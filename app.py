@@ -11,6 +11,7 @@ import json
 from pathlib import Path
 from local_xai import lookup_local_explanations
 from personalization import student_reason, recommend_strategy, FEATURE_GROUPS
+from release_data import ensure_release_data, ReleaseDataError
 
 
 # =====================================================
@@ -1316,11 +1317,14 @@ def render_behavior_dimensions(selected_user, user_history, previous, selected_c
 # =====================================================
 
 try:
+    if not (BASE / "recommendations.csv").is_file():
+        with st.spinner("Loading verified public LearnSphere recommendations and explanations..."):
+            ensure_release_data(BASE)
     predictions = load_predictions()
     history = load_history()
 except Exception as error:
     st.error("Deployment data files are missing or invalid: " + str(error))
-    st.info("Copy your saved data/recommendations.csv and data/local_xai/xai_batch_*.sqlite files into this project. No model training or SHAP/LIME calculation happens in the web app.")
+    st.info("Upload approved recommendations.csv and all 12 xai_batch_NNN.sqlite databases as GitHub Release assets under tag learnsphere-data-v1. No model training or SHAP/LIME recalculation is performed.")
     st.stop()
 
 users = sorted(predictions["userid_DI"].dropna().unique().tolist(),

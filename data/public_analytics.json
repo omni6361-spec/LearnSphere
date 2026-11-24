@@ -1,0 +1,293 @@
+{
+  "generated_utc": "2026-11-24T01:38:27.517314+00:00",
+  "methodology": "SHAP and LIME saved per recommendation; top-five per-method feature rankings exclude the synthetic SHAP aggregation row. LIME R² is in-sample local surrogate fit; agreement is descriptive only.",
+  "total_recommendations": 177247,
+  "unique_learners": 59107,
+  "unique_courses": 11,
+  "shard_counts": {
+    "xai_batch_001.sqlite": 15509,
+    "xai_batch_002.sqlite": 15438,
+    "xai_batch_003.sqlite": 15507,
+    "xai_batch_004.sqlite": 15527,
+    "xai_batch_005.sqlite": 15569,
+    "xai_batch_006.sqlite": 15662,
+    "xai_batch_007.sqlite": 15578,
+    "xai_batch_008.sqlite": 15458,
+    "xai_batch_009.sqlite": 15392,
+    "xai_batch_010.sqlite": 15448,
+    "xai_batch_011.sqlite": 15292,
+    "xai_batch_012.sqlite": 6867
+  },
+  "mean_lime_fidelity": 0.740299,
+  "mean_top5_overlap": 1.40896,
+  "mean_jaccard": 0.170657,
+  "zero_overlap_percent": 5.5499,
+  "shared_sign_agreement": 0.646548,
+  "shared_sign_denominator": 249734,
+  "shared_sign_numerator": 161465,
+  "overlap_distribution": [
+    {
+      "Shared_Features": 0,
+      "Recommendations": 9837,
+      "Percentage": 5.5499
+    },
+    {
+      "Shared_Features": 1,
+      "Recommendations": 90370,
+      "Percentage": 50.9853
+    },
+    {
+      "Shared_Features": 2,
+      "Recommendations": 71820,
+      "Percentage": 40.5197
+    },
+    {
+      "Shared_Features": 3,
+      "Recommendations": 5156,
+      "Percentage": 2.9089
+    },
+    {
+      "Shared_Features": 4,
+      "Recommendations": 64,
+      "Percentage": 0.0361
+    }
+  ],
+  "fidelity_groups": [
+    {
+      "Group": "Low (<0.50)",
+      "Recommendations": 14191,
+      "Mean_LIME_Fidelity": 0.387793,
+      "Mean_Top5_Overlap": 0.940032,
+      "Mean_Jaccard": 0.111284
+    },
+    {
+      "Group": "Moderate (0.50–0.75)",
+      "Recommendations": 46377,
+      "Mean_LIME_Fidelity": 0.726897,
+      "Mean_Top5_Overlap": 1.392371,
+      "Mean_Jaccard": 0.167542
+    },
+    {
+      "Group": "Higher (≥0.75)",
+      "Recommendations": 116679,
+      "Mean_LIME_Fidelity": 0.7885,
+      "Mean_Top5_Overlap": 1.472587,
+      "Mean_Jaccard": 0.179117
+    }
+  ],
+  "courses": [
+    {
+      "Course": "HarvardX/ER22x/2013_Spring",
+      "Recommendations": 44832,
+      "Mean_Model_Score": 0.429838,
+      "Mean_LIME_Fidelity": 0.771676,
+      "Mean_Top5_Overlap": 1.600308,
+      "Mean_Jaccard": 0.195804,
+      "Zero_Overlap_Percent": 0.0045,
+      "Low_Fidelity_Percent": 0.0156,
+      "Shared_Sign_Agreement": 0.712872
+    },
+    {
+      "Course": "HarvardX/CS50x/2012",
+      "Recommendations": 42691,
+      "Mean_Model_Score": 0.430476,
+      "Mean_LIME_Fidelity": 0.765799,
+      "Mean_Top5_Overlap": 1.687335,
+      "Mean_Jaccard": 0.208135,
+      "Zero_Overlap_Percent": 0.0281,
+      "Low_Fidelity_Percent": 0.0305,
+      "Shared_Sign_Agreement": 0.63148
+    },
+    {
+      "Course": "HarvardX/PH278x/2013_Spring",
+      "Recommendations": 28453,
+      "Mean_Model_Score": 0.396381,
+      "Mean_LIME_Fidelity": 0.59814,
+      "Mean_Top5_Overlap": 1.050645,
+      "Mean_Jaccard": 0.12258,
+      "Zero_Overlap_Percent": 15.0072,
+      "Low_Fidelity_Percent": 46.6629,
+      "Shared_Sign_Agreement": 0.576504
+    },
+    {
+      "Course": "HarvardX/CB22x/2013_Spring",
+      "Recommendations": 28398,
+      "Mean_Model_Score": 0.393085,
+      "Mean_LIME_Fidelity": 0.756236,
+      "Mean_Top5_Overlap": 1.061976,
+      "Mean_Jaccard": 0.124323,
+      "Zero_Overlap_Percent": 15.2933,
+      "Low_Fidelity_Percent": 0.0106,
+      "Shared_Sign_Agreement": 0.826248
+    },
+    {
+      "Course": "MITx/8.MReV/2013_Summer",
+      "Recommendations": 20126,
+      "Mean_Model_Score": 0.432592,
+      "Mean_LIME_Fidelity": 0.774352,
+      "Mean_Top5_Overlap": 1.330269,
+      "Mean_Jaccard": 0.158726,
+      "Zero_Overlap_Percent": 1.1825,
+      "Low_Fidelity_Percent": 0.0795,
+      "Shared_Sign_Agreement": 0.369365
+    },
+    {
+      "Course": "MITx/6.00x/2013_Spring",
+      "Recommendations": 7343,
+      "Mean_Model_Score": 0.394559,
+      "Mean_LIME_Fidelity": 0.785935,
+      "Mean_Top5_Overlap": 1.52785,
+      "Mean_Jaccard": 0.187631,
+      "Zero_Overlap_Percent": 1.8385,
+      "Low_Fidelity_Percent": 0.8716,
+      "Shared_Sign_Agreement": 0.49122
+    },
+    {
+      "Course": "MITx/6.002x/2013_Spring",
+      "Recommendations": 5122,
+      "Mean_Model_Score": 0.47075,
+      "Mean_LIME_Fidelity": 0.760277,
+      "Mean_Top5_Overlap": 1.422296,
+      "Mean_Jaccard": 0.177355,
+      "Zero_Overlap_Percent": 16.3413,
+      "Low_Fidelity_Percent": 14.6622,
+      "Shared_Sign_Agreement": 0.933562
+    },
+    {
+      "Course": "HarvardX/PH207x/2012_Fall",
+      "Recommendations": 88,
+      "Mean_Model_Score": 0.372793,
+      "Mean_LIME_Fidelity": 0.672888,
+      "Mean_Top5_Overlap": 2.340909,
+      "Mean_Jaccard": 0.327787,
+      "Zero_Overlap_Percent": 0,
+      "Low_Fidelity_Percent": 11.3636,
+      "Shared_Sign_Agreement": 0.990291
+    },
+    {
+      "Course": "MITx/3.091x/2013_Spring",
+      "Recommendations": 82,
+      "Mean_Model_Score": 0.463623,
+      "Mean_LIME_Fidelity": 0.787619,
+      "Mean_Top5_Overlap": 2.743902,
+      "Mean_Jaccard": 0.392518,
+      "Zero_Overlap_Percent": 0,
+      "Low_Fidelity_Percent": 13.4146,
+      "Shared_Sign_Agreement": 0.68
+    },
+    {
+      "Course": "MITx/8.02x/2013_Spring",
+      "Recommendations": 59,
+      "Mean_Model_Score": 0.432978,
+      "Mean_LIME_Fidelity": 0.750014,
+      "Mean_Top5_Overlap": 1.864407,
+      "Mean_Jaccard": 0.235876,
+      "Zero_Overlap_Percent": 0,
+      "Low_Fidelity_Percent": 3.3898,
+      "Shared_Sign_Agreement": 0.536364
+    },
+    {
+      "Course": "MITx/6.002x/2012_Fall",
+      "Recommendations": 53,
+      "Mean_Model_Score": 0.377921,
+      "Mean_LIME_Fidelity": 0.281662,
+      "Mean_Top5_Overlap": 1.603774,
+      "Mean_Jaccard": 0.203205,
+      "Zero_Overlap_Percent": 0,
+      "Low_Fidelity_Percent": 69.8113,
+      "Shared_Sign_Agreement": 0.741176
+    }
+  ],
+  "most_frequent_shap_top1": [
+    {
+      "Feature": "course_age_days",
+      "Recommendations": 121995
+    },
+    {
+      "Feature": "days_since_last_start",
+      "Recommendations": 34957
+    },
+    {
+      "Feature": "provider_diversity",
+      "Recommendations": 13058
+    },
+    {
+      "Feature": "course_popularity_7d",
+      "Recommendations": 3418
+    },
+    {
+      "Feature": "course_popularity_prev7d",
+      "Recommendations": 2031
+    },
+    {
+      "Feature": "course_code_history_count",
+      "Recommendations": 1653
+    },
+    {
+      "Feature": "course_term_2012_Fall",
+      "Recommendations": 107
+    },
+    {
+      "Feature": "course_code_diversity",
+      "Recommendations": 17
+    },
+    {
+      "Feature": "provider_history_count",
+      "Recommendations": 8
+    },
+    {
+      "Feature": "provider_affinity",
+      "Recommendations": 3
+    }
+  ],
+  "most_frequent_lime_top1": [
+    {
+      "Feature": "course_popularity_7d",
+      "Recommendations": 161107
+    },
+    {
+      "Feature": "course_term_2012_Fall",
+      "Recommendations": 13118
+    },
+    {
+      "Feature": "course_code_affinity",
+      "Recommendations": 700
+    },
+    {
+      "Feature": "course_code_history_count",
+      "Recommendations": 636
+    },
+    {
+      "Feature": "provider_affinity",
+      "Recommendations": 536
+    },
+    {
+      "Feature": "user_starts_30d",
+      "Recommendations": 360
+    },
+    {
+      "Feature": "days_since_last_start",
+      "Recommendations": 327
+    },
+    {
+      "Feature": "provider_diversity",
+      "Recommendations": 158
+    },
+    {
+      "Feature": "course_code_3.091x",
+      "Recommendations": 89
+    },
+    {
+      "Feature": "history_count",
+      "Recommendations": 82
+    },
+    {
+      "Feature": "course_code_diversity",
+      "Recommendations": 74
+    },
+    {
+      "Feature": "course_trend_7d",
+      "Recommendations": 38
+    }
+  ]
+}

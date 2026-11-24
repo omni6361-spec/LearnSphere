@@ -1,0 +1,32 @@
+name: Prepare LearnSphere data release
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main1
+    paths:
+      - .github/workflows/prepare-data-release.yml
+
+permissions:
+  contents: write
+
+jobs:
+  create-draft:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare draft release for approved data
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if gh release view learnsphere-data-v1 --repo "$GH_REPO" >/dev/null 2>&1; then
+            echo "Release tag learnsphere-data-v1 already exists."
+          else
+            gh release create learnsphere-data-v1 \
+              --repo "$GH_REPO" \
+              --target main1 \
+              --title "LearnSphere precomputed SHAP and LIME datasets" \
+              --notes "Historical course recommendations and SHAP/LIME explanations. Upload recommendations.csv and 12 xai_batch_NNN.sqlite files only after reviewing publication rights, anonymity, and metadata. Never include raw learner histories, behavior.csv, WAL/SHM files, joblib, or raw training data." \
+              --draft
+          fi

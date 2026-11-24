@@ -1322,9 +1322,35 @@ try:
             ensure_release_data(BASE)
     predictions = load_predictions()
     history = load_history()
+except ReleaseDataError as error:
+    st.title("LearnSphere — Research Results")
+    st.warning("Individual learner recommendations are not yet available on this public server. The complete data release is awaiting publication.")
+    st.caption("The verified aggregate results below are based on the 177,247 historical recommendations; they contain no learner-level records.")
+    public_metrics_path = BASE / "public_analytics.json"
+    if public_metrics_path.is_file():
+        stats = json.loads(public_metrics_path.read_text(encoding="utf-8"))
+        col1, col2, col3, col4 = st.columns(4)
+        col1.metric("Recommendations explained", f"{stats['total_recommendations']:,}")
+        col2.metric("Learners in study", f"{stats['unique_learners']:,}")
+        col3.metric("Mean LIME local R²", f"{stats['mean_lime_fidelity']:.3f}")
+        col4.metric("Mean Top-5 Jaccard", f"{stats['mean_jaccard']:.3f}")
+        st.subheader("Recommendation counts by course")
+        course_summary = pd.DataFrame(stats.get("courses", []))
+        if not course_summary.empty:
+            st.bar_chart(course_summary.set_index("Course")["Recommendations"])
+        st.subheader("SHAP vs LIME: shared Top-5 features")
+        overlap = pd.DataFrame(stats.get("overlap_distribution", []))
+        if not overlap.empty:
+            st.bar_chart(overlap.set_index("Shared_Features")["Recommendations"])
+        st.caption(stats.get("methodology", ""))
+    else:
+        st.info("The aggregate research results are also being prepared for public release.")
+    with st.expander("When will learner recommendations become available?"):
+        st.write("The site will download the approved recommendations.csv and 12 SHAP/LIME SQLite shards when the public GitHub Release tagged learnsphere-data-v1 contains all required files. The site does not retrain the model.")
+        st.code(str(error), language=None)
+    st.stop()
 except Exception as error:
-    st.error("Deployment data files are missing or invalid: " + str(error))
-    st.info("Upload approved recommendations.csv and all 12 xai_batch_NNN.sqlite databases as GitHub Release assets under tag learnsphere-data-v1. No model training or SHAP/LIME recalculation is performed.")
+    st.error("Deployment data could not be loaded: " + str(error))
     st.stop()
 
 users = sorted(predictions["userid_DI"].dropna().unique().tolist(),

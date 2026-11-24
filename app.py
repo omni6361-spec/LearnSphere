@@ -11,7 +11,7 @@ import json
 from pathlib import Path
 from local_xai import lookup_local_explanations
 from personalization import student_reason, recommend_strategy, FEATURE_GROUPS
-from release_data import ensure_release_data, ReleaseDataError
+from release_data import ensure_release_data, ensure_release_history, ReleaseDataError
 
 
 # =====================================================
@@ -1321,6 +1321,14 @@ try:
         with st.spinner("Loading verified public LearnSphere recommendations and explanations..."):
             ensure_release_data(BASE)
     predictions = load_predictions()
+    # Import only pseudonymous, pre-cutoff course selections for public display.
+    # Fail gracefully if the history asset is missing or fails review.
+    history_warning = None
+    try:
+        with st.spinner("Loading earlier course selections..."):
+            ensure_release_history(BASE)
+    except ReleaseDataError as history_error:
+        history_warning = str(history_error)
     history = load_history()
 except ReleaseDataError as error:
     st.title("LearnSphere — Research Results")
@@ -1352,6 +1360,11 @@ except ReleaseDataError as error:
 except Exception as error:
     st.error("Deployment data could not be loaded: " + str(error))
     st.stop()
+
+if history_warning:
+    st.sidebar.warning(
+        "Course history could not be loaded automatically: " + history_warning
+    )
 
 users = sorted(predictions["userid_DI"].dropna().unique().tolist(),
                key=lambda v: (0, int(v.split()[-1])) if v.startswith('Learner ') and v.split()[-1].isdigit()

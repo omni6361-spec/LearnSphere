@@ -6,7 +6,9 @@ training data, enrollment records, or private user identifiers here.
 from __future__ import annotations
 
 import csv
+import hashlib
 import json
+import zipfile
 import os
 import sqlite3
 import tempfile
@@ -18,7 +20,23 @@ REPOSITORY = "omni6361-spec/LearnSphere"
 RELEASE_TAG = "learnsphere-data-v1"
 EXPECTED_RECOMMENDATIONS = 177_247
 SHARDS = [f"xai_batch_{i:03d}.sqlite" for i in range(1, 13)]
+BUNDLE_NAME = "LearnSphere_Data_One_Upload.zip"
+BUNDLE_SHA256 = "16e5ceca7787960044240ccff44f7d4d4ca1c8bd3f4d9e8a8721302b3731cdf7"
+PART_SHAS = {
+    "LearnSphere_Data_Part_1.zip": "7af8902e8fd236fe7b1024f7fa6ae6119163080a1cd5abeca8126c764fa4f90b",
+    "LearnSphere_Data_Part_2.zip": "ecec2d34ec606385ca2740bb193d7bdc266af09d3c5a64bd682e4ebac941bb99",
+    "LearnSphere_Data_Part_3.zip": "12353e0af57701f5ba30db6ab378de8b30f1a277d294f118d03c5cf99bb7ea3f",
+    "LearnSphere_Data_Part_4.zip": "f1535ecac6403b6ec7d8ba7b347688e1b396175603c8f96e6e1772e1e224bbae",
+}
+PART_CONTENTS = {
+    "LearnSphere_Data_Part_1.zip": set(SHARDS[:3]),
+    "LearnSphere_Data_Part_2.zip": set(SHARDS[3:6]),
+    "LearnSphere_Data_Part_3.zip": set(SHARDS[6:9]),
+    "LearnSphere_Data_Part_4.zip": {"recommendations.csv", *SHARDS[9:]},
+}
 DOWNLOAD_LIMITS = {
+    BUNDLE_NAME: 110_000_000,
+    **{name: 35_000_000 for name in PART_SHAS},
     "recommendations.csv": 100_000_000,
     **{name: 150_000_000 for name in SHARDS},
     "public_analytics.json": 10_000_000,
@@ -94,11 +112,11 @@ def _check_shards(paths: list[Path], expected: set[tuple[str, str]]) -> None:
 
 
 def ensure_release_data(data_dir: Path) -> bool:
-    """Download all 13 files once if recommendations.csv is missing.
+    """Download and verify precomputed data from an approved GitHub Release.
 
-    Publish an approved GitHub Release with the tag learnsphere-data-v1.
-    Assets must be recommendations.csv and all 12 xai_batch_NNN.sqlite files.
-    An optional public_analytics.json enables the aggregated dashboard.
+    The release accepts either one bundle, four small parts, or 13 original
+    files. All prepackaged ZIP assets are pinned by SHA256 and checked before
+    extraction; individual SQLite shards are integrity-checked after download.
     """
     data_dir = Path(data_dir)
     destination = data_dir / "local_xai"
@@ -131,15 +149,24 @@ def ensure_release_data(data_dir: Path) -> bool:
         for item in release.get("assets", [])
     }
     needed = ["recommendations.csv", *SHARDS]
-    missing = [name for name in needed if name not in assets]
-    if missing:
-        raise ReleaseDataError(
-            "Dataset release is incomplete; missing " + ", ".join(missing[:5])
-        )
-    prefix = (
-        f"https://github.com/{REPOSITORY}/releases/download/{RELEASE_TAG}/"
-    )
-    for name in [*needed, "public_analytics.json"]:
+    if BUNDLE_NAME in assets:
+        packaging = "bundle"
+        chosen = [BUNDLE_NAME]
+    elif all(name in assets for name in PART_SHAS):
+        packaging = "parts"
+        chosen = list(PART_SHAS)
+    else:
+        packaging = "individual"
+        chosen = needed
+        missing = [name for name in needed if name not in assets]
+        if missing:
+            raise ReleaseDataError(
+                "Upload LearnSphere_Data_One_Upload.zip OR all four "
+                "LearnSphere_Data_Part_N.zip files. Missing: "
+                + ", ".join(missing[:5])
+            )
+    prefix = f"https://github.com/{REPOSITORY}/releases/download/{RELEASE_TAG}/"
+    for name in [*chosen, "public_analytics.json"]:
         if name in assets and assets[name] != prefix + name:
             raise ReleaseDataError("Unexpected asset download URL")
 
@@ -148,11 +175,48 @@ def ensure_release_data(data_dir: Path) -> bool:
         prefix="learnsphere-release-", dir=data_dir
     ) as temp:
         stage = Path(temp)
-        for name in needed:
-            try:
-                _download(assets[name], stage / name, DOWNLOAD_LIMITS[name])
-            except (HTTPError, URLError, TimeoutError, OSError) as exc:
-                raise ReleaseDataError(f"Failed to download {name}: {exc}") from exc
+        if packaging == "individual":
+            for name in chosen:
+                try:
+                    _download(assets[name], stage / name, DOWNLOAD_LIMITS[name])
+                except (HTTPError, URLError, TimeoutError, OSError) as exc:
+                    raise ReleaseDataError(f"Failed to download {name}: {exc}") from exc
+        else:
+            for name in chosen:
+                try:
+                    archived = stage / name
+                    _download(assets[name], archived, DOWNLOAD_LIMITS[name])
+                    expected_sha = BUNDLE_SHA256 if packaging == "bundle" else PART_SHAS[name]
+                    digest = hashlib.sha256()
+                    with archived.open("rb") as handle:
+                        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                            digest.update(chunk)
+                    if digest.hexdigest() != expected_sha:
+                        raise ReleaseDataError(
+                            f"{name} failed SHA256 verification. Do not repack the archive."
+                        )
+                    with zipfile.ZipFile(archived, "r") as archive:
+                        expected_names = (set(needed) if packaging == "bundle"
+                                          else PART_CONTENTS[name])
+                        entries = archive.infolist()
+                        if (len(entries) != len(expected_names) or
+                            {entry.filename for entry in entries} != expected_names or
+                            sum(entry.file_size for entry in entries) > 600_000_000):
+                            raise ReleaseDataError(f"Unexpected files in {name}")
+                        for entry in entries:
+                            if (entry.is_dir() or entry.file_size < 1_000 or
+                                entry.file_size > DOWNLOAD_LIMITS[entry.filename]):
+                                raise ReleaseDataError(f"Invalid entry in {name}")
+                        archive.extractall(stage)
+                    archived.unlink()
+                except ReleaseDataError:
+                    raise
+                except (HTTPError, URLError, TimeoutError, OSError,
+                        zipfile.BadZipFile, RuntimeError) as exc:
+                    raise ReleaseDataError(
+                        f"Could not download or unpack {name}: {exc}"
+                    ) from exc
+
         expected = _check_recommendations(stage / "recommendations.csv")
         _check_shards([stage / name for name in SHARDS], expected)
 

@@ -42,4 +42,19 @@ jobs:
               print("PASS: pre-cutoff course display available")
               print("Unique pseudonymous learners with history:", history.userid_DI.nunique())
               print("Unique learner-course selections:", len(history))
+              from urllib.request import Request, urlopen
+              from io import BytesIO
+              release_csv = "https://github.com/omni6361-spec/LearnSphere/releases/download/learnsphere-data-v1/recommendations.csv"
+              request = Request(release_csv, headers={"User-Agent": "LearnSphere-HistoryCheck/1.0"})
+              with urlopen(request, timeout=90) as response:
+                  rec = pd.read_csv(BytesIO(response.read()), dtype={"userid_DI": str, "course_id": str})
+              history_users = set(history.userid_DI)
+              rec_users = set(rec.userid_DI)
+              print("History / recommendations common IDs:", len(history_users & rec_users))
+              print("First recommendation IDs:", sorted(rec_users)[:12])
+              print("First history IDs:", sorted(history_users)[:12])
+              for uid in ["Learner 00001", "Learner 00006"]:
+                  print("Learner detail:", repr(uid), "history", sum(history.userid_DI==uid),
+                        "recommended", sum(rec.userid_DI==uid))
+              assert rec_users == history_users, "Learner IDs do not match between histories and recommendations"
           PY

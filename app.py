@@ -226,6 +226,70 @@ div[data-testid="stMetric"] {
     color: #183153 !important;
 }
 
+
+/* Mobile theme-contrast repair:
+   Some visitors use Streamlit's dark client theme while our course
+   surfaces remain light. Explicitly color native Streamlit content
+   instead of allowing white text to inherit from the client theme. */
+.stApp [data-testid="stMain"] {
+    color: #183153 !important;
+    background-color: #f5f7fb !important;
+    color-scheme: light;
+}
+.stApp [data-testid="stMain"] [data-testid="stMarkdownContainer"] {
+    color: #183153 !important;
+}
+.stApp [data-testid="stMain"] [data-testid="stMarkdownContainer"]
+:is(h1, h2, h3, h4, h5, h6, p, li, strong, em) {
+    color: #183153 !important;
+}
+.stApp [data-testid="stMain"]
+:is([data-testid="stMetricLabel"], [data-testid="stMetricLabel"] *,
+    [data-testid="stMetricValue"], [data-testid="stMetricValue"] *,
+    [data-testid="stCaptionContainer"], [data-testid="stCaptionContainer"] *) {
+    color: #314b68 !important;
+}
+.stApp [data-testid="stMain"]
+[data-testid="stExpander"] {
+    background: #ffffff !important;
+    color: #183153 !important;
+}
+.stApp [data-testid="stMain"]
+[data-testid="stExpander"] :is(summary, summary *) {
+    background: #ffffff !important;
+    color: #183153 !important;
+}
+.stApp [data-testid="stMain"]
+[data-testid="stExpanderDetails"] {
+    color: #183153 !important;
+    background: #ffffff !important;
+}
+/* Restore intentional white-on-blue hero and strategy elements. */
+.stApp [data-testid="stMain"] [data-testid="stMarkdownContainer"]
+.hero :is(h1, h2, h3, h4, strong) {
+    color: #ffffff !important;
+}
+.stApp [data-testid="stMain"] [data-testid="stMarkdownContainer"]
+.hero p {
+    color: #dce9ff !important;
+}
+.stApp [data-testid="stMain"] [data-testid="stMarkdownContainer"]
+.strategy-result :is(h2, h3, h4, strong) {
+    color: #ffffff !important;
+}
+.stApp [data-testid="stMain"] [data-testid="stMarkdownContainer"]
+.strategy-result p {
+    color: #e0f3f4 !important;
+}
+.stApp [data-testid="stMain"] [data-testid="stMarkdownContainer"]
+.recommendation-reason :is(p, strong, span) {
+    color: #1d4050 !important;
+}
+.stApp [data-testid="stMain"] [data-testid="stMarkdownContainer"]
+.course-rank {
+    color: #176878 !important;
+}
+
 @media (max-width: 640px) {
     .hero { padding: 26px 22px; border-radius: 18px; }
     .hero h1 { font-size: 30px; line-height: 1.24; }

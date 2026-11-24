@@ -245,3 +245,94 @@ def ensure_release_data(data_dir: Path) -> bool:
                 data_dir / "public_analytics.json",
             )
     return True
+
+
+
+def ensure_release_history(data_dir: Path) -> bool:
+    """Create a minimal pre-cutoff learner-course display from a Release history.csv.
+
+    This never publishes raw histories in the repository and never displays
+    activity, identifiers other than pseudonymous learner IDs, or future starts.
+    Raw Release asset visibility must be reviewed separately by the data owner.
+    """
+    data_dir = Path(data_dir)
+    output = data_dir / "history_display.csv"
+    if output.is_file():
+        return False
+
+    api = f"https://api.github.com/repos/{REPOSITORY}/releases/tags/{RELEASE_TAG}"
+    try:
+        request = Request(
+            api,
+            headers={"User-Agent": "LearnSphere-Streamlit/1.0",
+                     "Accept": "application/vnd.github+json"},
+        )
+        with urlopen(request, timeout=30) as response:
+            release = json.load(response)
+    except (HTTPError, URLError, TimeoutError, ValueError) as exc:
+        raise ReleaseDataError(f"Unable to find course-history release: {exc}") from exc
+
+    sources = {
+        item["name"]: item["browser_download_url"]
+        for item in release.get("assets", [])
+    }
+    source_url = sources.get("history.csv")
+    expected_url = (
+        f"https://github.com/{REPOSITORY}/releases/download/"
+        f"{RELEASE_TAG}/history.csv"
+    )
+    if not source_url:
+        raise ReleaseDataError("history.csv is not attached to the data release")
+    if source_url != expected_url:
+        raise ReleaseDataError("Unexpected course-history asset URL")
+
+    # Only a minimal, pre-2013-08-01 view is retained on the server.
+    # Never copy full history.csv into the public site's data directory.
+    import pandas as pd
+
+    data_dir.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(
+        prefix="learnsphere-history-", dir=data_dir
+    ) as temp:
+        stage = Path(temp)
+        raw = stage / "history.csv"
+        try:
+            _download(source_url, raw, 60_000_000)
+            history = pd.read_csv(
+                raw, dtype={"userid_DI": "string", "course_id": "string"},
+                low_memory=False
+            )
+        except (HTTPError, URLError, TimeoutError, OSError, ValueError) as exc:
+            raise ReleaseDataError(
+                f"Could not download or read course history: {exc}"
+            ) from exc
+
+        required = {"userid_DI", "course_id", "start_time_DI"}
+        if not required.issubset(history.columns):
+            raise ReleaseDataError(
+                "Course-history columns missing: "
+                + ", ".join(sorted(required - set(history.columns)))
+            )
+
+        dates = pd.to_datetime(
+            history["start_time_DI"], errors="coerce", utc=True,
+        )
+        before_cutoff = dates < pd.Timestamp("2013-08-01", tz="UTC")
+        display = (
+            history.loc[before_cutoff, ["userid_DI", "course_id"]]
+            .dropna()
+            .drop_duplicates()
+            .copy()
+        )
+        valid = display["userid_DI"].str.fullmatch(
+            r"Learner \d+", na=False
+        )
+        if not valid.all():
+            raise ReleaseDataError(
+                "Course history has non-pseudonymous identifiers; display denied"
+            )
+        if not display["course_id"].str.strip().ne("").all():
+            raise ReleaseDataError("Course history has blank course IDs")
+        display.to_csv(stage / "history_display.csv", index=False)
+        os.replace(stage / "history_display.csv", output)
+    return True

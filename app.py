@@ -201,6 +201,37 @@ div[data-testid="stMetric"] {
 .strategy-result h3 {color:white; margin: 8px 0;}
 .strategy-result p {color:#e0f3f4;}
 .audience-note {color:#64748b; font-size:13px;}
+
+/* Keep text readable on Streamlit Cloud and mobile browsers. */
+.stApp [data-testid="stMain"] [data-testid="stMarkdownContainer"] > h1,
+.stApp [data-testid="stMain"] [data-testid="stMarkdownContainer"] > h2,
+.stApp [data-testid="stMain"] [data-testid="stMarkdownContainer"] > h3,
+.stApp [data-testid="stMain"] [data-testid="stMarkdownContainer"] > h4,
+.stApp [data-testid="stMain"] [data-testid="stMarkdownContainer"] > p,
+.stApp [data-testid="stMain"] [data-testid="stMarkdownContainer"] > ul,
+.stApp [data-testid="stMain"] [data-testid="stMarkdownContainer"] > ol {
+    color: #183153 !important;
+}
+.stApp [data-testid="stMain"] [data-testid="stCaptionContainer"],
+.stApp [data-testid="stMain"] [data-testid="stCaptionContainer"] p {
+    color: #526581 !important;
+}
+.stApp [data-testid="stMain"] [data-testid="stMetricLabel"],
+.stApp [data-testid="stMain"] [data-testid="stMetricLabel"] p,
+.stApp [data-testid="stMain"] [data-testid="stMetricValue"] {
+    color: #183153 !important;
+}
+.stApp [data-testid="stMain"] [data-testid="stExpander"] summary,
+.stApp [data-testid="stMain"] [data-testid="stExpander"] summary p {
+    color: #183153 !important;
+}
+
+@media (max-width: 640px) {
+    .hero { padding: 26px 22px; border-radius: 18px; }
+    .hero h1 { font-size: 30px; line-height: 1.24; }
+    .block-container { padding-top: 1rem; }
+    .student-cover { height: auto; aspect-ratio: 16 / 9; }
+}
 </style>
 """, unsafe_allow_html=True)
 

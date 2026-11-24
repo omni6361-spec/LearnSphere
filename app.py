@@ -225,7 +225,10 @@ def load_predictions():
 
 
 @st.cache_data(show_spinner=False)
-def load_history():
+def load_history(source_version=None):
+    # Include the source file version in the Streamlit cache key.
+    # Otherwise a previous empty result can remain cached after the
+    # on-demand GitHub Release history import completes.
     # A reviewed, pre-cutoff history_display.csv has only learner/course keys.
     # The complete history.csv is used locally when dates are available.
     display_path = BASE / "history_display.csv"
@@ -1329,7 +1332,15 @@ try:
             ensure_release_history(BASE)
     except ReleaseDataError as history_error:
         history_warning = str(history_error)
-    history = load_history()
+    history_path = BASE / "history_display.csv"
+    if not history_path.is_file():
+        history_path = DATA_PATH
+    history_version = (
+        (history_path.name, history_path.stat().st_size,
+         history_path.stat().st_mtime_ns)
+        if history_path.is_file() else ("no-history", 0, 0)
+    )
+    history = load_history(history_version)
 except ReleaseDataError as error:
     st.title("LearnSphere — Research Results")
     st.warning("Individual learner recommendations are not yet available on this public server. The complete data release is awaiting publication.")
